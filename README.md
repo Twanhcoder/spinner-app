@@ -25,7 +25,7 @@ Cài đặt gồm thời gian 3/5/8 giây, âm thanh và không lặp kết qu�
 
 Danh sách, cài đặt và các lựa chọn đã quay được lưu trong localStorage của trình duyệt. Khi tải lại trang, app mở màn hình nhập với danh sách đã lưu. Dữ liệu không đồng bộ giữa thiết bị. Nếu trình duyệt chặn lưu trữ, app thông báo và vẫn cho phép sử dụng trong phiên hiện tại.
 
-Âm thanh mặc định tắt. Chế độ giảm chuyển động của hệ điều hành được tôn trọng. Đang quay thì các thao tác sửa/cài đặt bị khóa.
+Âm thanh mặc định bật cho lần sử dụng đầu tiên: tiếng tick đồng bộ theo dòng đi qua và chậm dần cùng spinner, kèm ba nốt báo kết quả. Bật/tắt bằng nút ở góc dưới bên phải hoặc trong Cài đặt. Lựa chọn bật/tắt đã lưu trước đó được giữ nguyên. Âm thanh được tạo bằng Web Audio ngay trên thiết bị, không tải file bên ngoài và chỉ bắt đầu sau thao tác quay. Chế độ giảm chuyển động của hệ điều hành được tôn trọng. Đang quay thì các thao tác sửa/cài đặt bị khóa.
 
 ## Kiểm tra và build
 
@@ -63,7 +63,7 @@ React + TypeScript, Vite, Motion, Radix Dialog, Tailwind CSS và CSS tùy chỉn
 
 - Build production và kiểm tra TypeScript: thành công.
 - 8 unit tests: thành công.
-- 4 luồng kiểm thử Chrome: thành công, gồm nhập/sửa/lưu danh sách, quay thực tế và căn kết quả, không lặp/đặt lại/bàn phím, mobile 360 px và cài đặt.
+- 6 luồng kiểm thử Chrome: thành công, gồm nhập/sửa/lưu danh sách, quay thực tế và căn kết quả, không lặp/đặt lại/bàn phím, mobile 360 px, âm thanh/bật tắt/lưu tùy chọn và trường hợp không có AudioContext.
 - Đã xem ảnh chụp desktop 1440 px và mobile 360 px, bao gồm nội dung tiếng Việt dài.
 
-Ảnh chụp sau khi chạy `npm run test:e2e` nằm trong `test-results/`. Âm thanh đã được triển khai nhưng chưa kiểm tra nghe bằng loa thực tế; các trình duyệt khác ngoài Chrome chưa được chạy kiểm thử tự động.
+Ảnh chụp sau khi chạy `npm run test:e2e` nằm trong `test-results/`. Kiểm thử âm thanh đo tín hiệu bằng AnalyserNode trong Chrome và kiểm tra tick/ba nốt kết quả; chưa nghe bằng loa thực tế. Các trình duyệt khác ngoài Chrome chưa được chạy kiểm thử tự động.

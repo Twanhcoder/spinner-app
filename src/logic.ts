@@ -28,7 +28,7 @@ export function centeredEntries(items: string[], center: string, radius = 2) {
   return Array.from({ length: radius * 2 + 1 }, (_, i) => items[((at + i - radius) % items.length + items.length) % items.length])
 }
 export type Settings = { duration: number; sound: boolean; noRepeat: boolean }
-export const defaultSettings: Settings = { duration: 5, sound: false, noRepeat: false }
+export const defaultSettings: Settings = { duration: 5, sound: true, noRepeat: false }
 export const STORAGE_KEY = 'spin-studio:v1'
 export function loadSaved(): { raw: string; settings: Settings; used: string[] } {
   try {
@@ -37,7 +37,8 @@ export function loadSaved(): { raw: string; settings: Settings; used: string[] }
       raw: typeof saved.raw === 'string' ? saved.raw.slice(0, 15000) : '',
       settings: {
         duration: [3, 5, 8].includes(saved.settings?.duration) ? saved.settings.duration : 5,
-        sound: saved.settings?.sound === true, noRepeat: saved.settings?.noRepeat === true,
+        sound: typeof saved.settings?.sound === 'boolean' ? saved.settings.sound : defaultSettings.sound,
+        noRepeat: saved.settings?.noRepeat === true,
       },
       used: Array.isArray(saved.used) ? saved.used.filter((x: unknown) => typeof x === 'string').slice(0, MAX_ITEMS) : [],
     }

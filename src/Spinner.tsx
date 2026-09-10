@@ -4,34 +4,21 @@ import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 
 import { ArrowClockwise, ArrowRight, Check, PencilSimple, Shuffle } from '@phosphor-icons/react'
 import { availableEntries, centeredEntries, randomIndex } from './logic'
 import type { Settings } from './logic'
+import { SpinAudio } from './SpinAudio'
 type Props = { items: string[]; used: string[]; settings: Settings; settingsOpen: boolean; onResult: (value: string) => void; onBusy: (busy: boolean) => void; onEdit: () => void; onReset: () => void }
 export default function Spinner({ items, used, settings, settingsOpen, onResult, onBusy, onEdit, onReset }: Props) {
   const [rows, setRows] = useState(() => centeredEntries(items, items[0]))
   const [result, setResult] = useState(''), [busy, setBusy] = useState(false)
   const lock = useRef(false)
   const controls = useRef<ReturnType<typeof animate> | null>(null)
-  const audio = useRef<AudioContext | null>(null), lastTick = useRef(0)
+  const audio = useRef<SpinAudio | null>(null), lastTick = useRef(0)
   const position = useMotionValue(2)
   const transform = useTransform(position, p => `translateY(calc(${2 - p} * var(--row-height)))`)
   const reducedMotion = useReducedMotion()
   const pool = availableEntries(items, used, settings.noRepeat), exhausted = pool.length === 0
   const spinRef = useRef<() => void>(() => {})
-  useEffect(() => () => { controls.current?.stop(); void audio.current?.close() }, [])
-  function tone(win = false) {
-    if (!settings.sound) return
-    try {
-      if (!audio.current) audio.current = new AudioContext()
-      const context = audio.current
-      void context.resume().catch(() => {})
-      const oscillator = context.createOscillator(), gain = context.createGain()
-      oscillator.connect(gain); gain.connect(context.destination); oscillator.type = 'sine'
-      oscillator.frequency.setValueAtTime(win ? 660 : 260, context.currentTime)
-      if (win) oscillator.frequency.exponentialRampToValueAtTime(990, context.currentTime + .16)
-      gain.gain.setValueAtTime(.045, context.currentTime)
-      gain.gain.exponentialRampToValueAtTime(.001, context.currentTime + (win ? .5 : .045))
-      oscillator.start(); oscillator.stop(context.currentTime + (win ? .5 : .05))
-    } catch { /* Optional audio must never interrupt the spin. */ }
-  }
+  useEffect(() => () => { controls.current?.stop() }, [])
+  useEffect(() => () => { audio.current?.close(); audio.current = null }, [settings.sound])
   function spin() {
     if (lock.current || exhausted || settingsOpen) return
     lock.current = true
@@ -40,18 +27,22 @@ export default function Spinner({ items, used, settings, settingsOpen, onResult,
     const sequence = [...first, ...Array.from({ length: 55 }, (_, i) => pool[i % pool.length]), ...centeredEntries(pool, winner)]
     const target = sequence.length - 3
     flushSync(() => { setRows(sequence); setResult(''); setBusy(true); onBusy(true) })
-    position.set(2); tone()
+    position.set(2)
+    lastTick.current = performance.now()
+    if (settings.sound) { audio.current ??= new SpinAudio(); audio.current.start() }
     let previousRow = 2
     controls.current = animate(position, target, {
       duration: reducedMotion || pool.length === 1 ? .2 : settings.duration,
       ease: [.12, .68, .14, 1],
       onUpdate: value => {
         const row = Math.floor(value)
-        if (row !== previousRow && performance.now() - lastTick.current > 50) { tone(); lastTick.current = performance.now() }
+        if (row !== previousRow && performance.now() - lastTick.current > 40) {
+          audio.current?.tick(); lastTick.current = performance.now()
+        }
         previousRow = row
       },
       onComplete: () => {
-        setResult(winner); setBusy(false); onBusy(false); onResult(winner); lock.current = false; tone(true)
+        setResult(winner); setBusy(false); onBusy(false); onResult(winner); lock.current = false; audio.current?.win()
       },
     })
   }

@@ -11,7 +11,7 @@ describe('saved data recovery', () => {
   })
   it('validates saved settings and history before using them', () => {
     vi.stubGlobal('localStorage', { getItem: () => JSON.stringify({ raw: 12, settings: { duration: -1, sound: 'yes' }, used: ['A', null, 2] }) })
-    expect(loadSaved()).toEqual({ raw: '', settings: { duration: 5, sound: false, noRepeat: false }, used: ['A'] })
+    expect(loadSaved()).toEqual({ raw: '', settings: { duration: 5, sound: true, noRepeat: false }, used: ['A'] })
   })
 })
 
