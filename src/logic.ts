@@ -36,7 +36,7 @@ export function loadSaved(): { raw: string; settings: Settings; used: string[] }
     return {
       raw: typeof saved.raw === 'string' ? saved.raw.slice(0, 15000) : '',
       settings: {
-        duration: [3, 5, 8].includes(saved.settings?.duration) ? saved.settings.duration : 5,
+        duration: [3, 4, 5].includes(saved.settings?.duration) ? saved.settings.duration : 5,
         sound: typeof saved.settings?.sound === 'boolean' ? saved.settings.sound : defaultSettings.sound,
         noRepeat: saved.settings?.noRepeat === true,
       },

@@ -55,7 +55,7 @@ test('no-repeat exhausts the pool, resets and respects the settings modal', asyn
   const winners: string[] = []
   for (let i = 0; i < 3; i++) {
     await page.getByRole('button', { name: i === 0 ? 'QUAY' : 'QUAY LẠI', exact: true }).click()
-    await expect(page.locator('.winner-label')).toBeVisible()
+    await expect(page.locator('.winner-label')).toBeVisible({ timeout: 7000 })
     winners.push(await page.locator('.winner-label strong').innerText())
   }
   expect(new Set(winners).size).toBe(3)
@@ -67,7 +67,7 @@ test('no-repeat exhausts the pool, resets and respects the settings modal', asyn
   await page.keyboard.press('Escape')
   await page.locator('h1').click()
   await page.keyboard.press('Space')
-  await expect(page.locator('.winner-label')).toBeVisible()
+  await expect(page.locator('.winner-label')).toBeVisible({ timeout: 7000 })
 })
 
 test('mobile layout handles long Vietnamese values and saves settings', async ({ page }) => {
@@ -78,14 +78,14 @@ test('mobile layout handles long Vietnamese values and saves settings', async ({
   await page.getByLabel('Danh sách của bạn').fill('Dành thời gian đọc một cuốn sách yêu thích và ghi lại những điều thú vị trong ngày hôm nay\nĐi dạo')
   await page.getByRole('button', { name: 'Tạo spinner' }).click()
   await page.getByRole('button', { name: 'QUAY', exact: true }).click()
-  await expect(page.locator('.winner-label')).toBeVisible()
+  await expect(page.locator('.winner-label')).toBeVisible({ timeout: 7000 })
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   await page.screenshot({ path: 'test-results/spinner-mobile.png', fullPage: true })
   await page.getByRole('button', { name: 'Cài đặt', exact: true }).click()
-  await page.getByRole('radio', { name: '8s Hồi hộp' }).check()
+  await page.getByRole('radio', { name: '5s Hồi hộp' }).check()
   await page.screenshot({ path: 'test-results/settings-mobile.png', fullPage: true })
   await page.keyboard.press('Escape')
   await page.reload()
   await page.getByRole('button', { name: 'Cài đặt', exact: true }).click()
-  await expect(page.getByRole('radio', { name: '8s Hồi hộp' })).toBeChecked()
+  await expect(page.getByRole('radio', { name: '5s Hồi hộp' })).toBeChecked()
 })

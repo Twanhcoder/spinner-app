@@ -21,7 +21,7 @@ Mở địa chỉ được Vite in trong terminal, mặc định http://127.0.0.
 3. Nhấn **Tạo spinner**, sau đó **QUAY** hoặc phím Space.
 4. Kết quả xuất hiện ở giữa khung đỏ. Nhấn **QUAY LẠI** hoặc **Sửa danh sách**.
 
-Cài đặt gồm thời gian 3/5/8 giây, âm thanh và không lặp kết quả. Khi bật không lặp, mỗi giá trị chỉ được chọn một lần trong lượt. Đặt lại lượt để dùng lại toàn bộ danh sách. Sửa danh sách hoặc thay đổi chế độ không lặp sẽ bắt đầu lượt mới.
+Cài đặt gồm thời gian 3/4/5 giây (mặc định 5 giây), âm thanh và không lặp kết quả. Khi bật không lặp, mỗi giá trị chỉ được chọn một lần trong lượt. Đặt lại lượt để dùng lại toàn bộ danh sách. Sửa danh sách hoặc thay đổi chế độ không lặp sẽ bắt đầu lượt mới.
 
 Danh sách, cài đặt và các lựa chọn đã quay được lưu trong localStorage của trình duyệt. Khi tải lại trang, app mở màn hình nhập với danh sách đã lưu. Dữ liệu không đồng bộ giữa thiết bị. Nếu trình duyệt chặn lưu trữ, app thông báo và vẫn cho phép sử dụng trong phiên hiện tại.
 
@@ -62,8 +62,11 @@ React + TypeScript, Vite, Motion, Radix Dialog, Tailwind CSS và CSS tùy chỉn
 ## Kết quả kiểm tra trên máy phát triển
 
 - Build production và kiểm tra TypeScript: thành công.
-- 8 unit tests: thành công.
-- 6 luồng kiểm thử Chrome: thành công, gồm nhập/sửa/lưu danh sách, quay thực tế và căn kết quả, không lặp/đặt lại/bàn phím, mobile 360 px, âm thanh/bật tắt/lưu tùy chọn và trường hợp không có AudioContext.
+- Unit tests kiểm tra dữ liệu đầu vào, random, phục hồi cài đặt và chuyển đổi thời lượng cũ.
+- Kiểm thử Chrome gồm nhập/sửa/lưu danh sách, quay thực tế và căn kết quả, không lặp/đặt lại/bàn phím, mobile 360 px, âm thanh/bật tắt/lưu tùy chọn và trường hợp không có AudioContext.
+- Kiểm thử thời gian đo các lượt 3 và 5 giây ở cả chế độ chuyển động bình thường và giảm chuyển động, bao gồm lượt cuối chỉ còn một lựa chọn.
 - Đã xem ảnh chụp desktop 1440 px và mobile 360 px, bao gồm nội dung tiếng Việt dài.
 
 Ảnh chụp sau khi chạy `npm run test:e2e` nằm trong `test-results/`. Kiểm thử âm thanh đo tín hiệu bằng AnalyserNode trong Chrome và kiểm tra tick/ba nốt kết quả; chưa nghe bằng loa thực tế. Các trình duyệt khác ngoài Chrome chưa được chạy kiểm thử tự động.
+
+Mỗi lượt luôn giữ đủ thời gian đã chọn, kể cả khi bật giảm chuyển động hoặc chỉ còn một lựa chọn. Cài đặt 8 giây từ phiên bản cũ tự chuyển về 5 giây.

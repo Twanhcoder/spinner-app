@@ -62,5 +62,5 @@ test('unavailable audio does not prevent a result', async ({ page }) => {
   await page.getByLabel('Danh sách của bạn').fill('Một\nHai')
   await page.getByRole('button', { name: 'Tạo spinner' }).click()
   await page.getByRole('button', { name: 'QUAY', exact: true }).click()
-  await expect(page.locator('.winner-label')).toBeVisible()
+  await expect(page.locator('.winner-label')).toBeVisible({ timeout: 7000 })
 })

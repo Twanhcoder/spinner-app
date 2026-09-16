@@ -3,6 +3,12 @@ import { availableEntries, centeredEntries, loadSaved, parseEntries, randomIndex
 
 afterEach(() => vi.unstubAllGlobals())
 describe('saved data recovery', () => {
+  it('keeps supported durations and migrates old or invalid values to 5 seconds', () => {
+    for (const duration of [3, 4, 5, 8, .2, null]) {
+      vi.stubGlobal('localStorage', { getItem: () => JSON.stringify({ settings: { duration } }) })
+      expect(loadSaved().settings.duration).toBe([3, 4, 5].includes(duration as number) ? duration : 5)
+    }
+  })
   it('recovers when browser storage is blocked or corrupt', () => {
     vi.stubGlobal('localStorage', { getItem: () => { throw new Error('blocked') } })
     expect(loadSaved().raw).toBe('')

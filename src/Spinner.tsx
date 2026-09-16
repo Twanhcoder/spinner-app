@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react'
+import { animate, motion, useMotionValue, useTransform } from 'motion/react'
 import { ArrowClockwise, ArrowRight, Check, PencilSimple, Shuffle } from '@phosphor-icons/react'
 import { availableEntries, centeredEntries, randomIndex } from './logic'
 import type { Settings } from './logic'
@@ -11,13 +11,16 @@ export default function Spinner({ items, used, settings, settingsOpen, onResult,
   const [result, setResult] = useState(''), [busy, setBusy] = useState(false)
   const lock = useRef(false)
   const controls = useRef<ReturnType<typeof animate> | null>(null)
+  const resultTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const audio = useRef<SpinAudio | null>(null), lastTick = useRef(0)
   const position = useMotionValue(2)
   const transform = useTransform(position, p => `translateY(calc(${2 - p} * var(--row-height)))`)
-  const reducedMotion = useReducedMotion()
   const pool = availableEntries(items, used, settings.noRepeat), exhausted = pool.length === 0
   const spinRef = useRef<() => void>(() => {})
-  useEffect(() => () => { controls.current?.stop() }, [])
+  useEffect(() => () => {
+    controls.current?.stop()
+    if (resultTimer.current !== null) clearTimeout(resultTimer.current)
+  }, [])
   useEffect(() => () => { audio.current?.close(); audio.current = null }, [settings.sound])
   function spin() {
     if (lock.current || exhausted || settingsOpen) return
@@ -32,8 +35,9 @@ export default function Spinner({ items, used, settings, settingsOpen, onResult,
     if (settings.sound) { audio.current ??= new SpinAudio(); audio.current.start() }
     let previousRow = 2
     controls.current = animate(position, target, {
-      duration: reducedMotion || pool.length === 1 ? .2 : settings.duration,
-      ease: [.12, .68, .14, 1],
+      // Reduced motion changes the visual treatment in CSS, never the result timing.
+      duration: settings.duration,
+      ease: [.2, 0, .2, 1],
       onUpdate: value => {
         const row = Math.floor(value)
         if (row !== previousRow && performance.now() - lastTick.current > 40) {
@@ -41,10 +45,14 @@ export default function Spinner({ items, used, settings, settingsOpen, onResult,
         }
         previousRow = row
       },
-      onComplete: () => {
-        setResult(winner); setBusy(false); onBusy(false); onResult(winner); lock.current = false; audio.current?.win()
-      },
     })
+    // Keep the reveal tied to elapsed time, independent of dropped animation frames.
+    resultTimer.current = setTimeout(() => {
+      controls.current?.stop()
+      position.set(target)
+      setResult(winner); setBusy(false); onBusy(false); onResult(winner)
+      lock.current = false; audio.current?.win(); resultTimer.current = null
+    }, settings.duration * 1000)
   }
   spinRef.current = spin
   useEffect(() => {
