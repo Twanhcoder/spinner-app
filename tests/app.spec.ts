@@ -89,3 +89,25 @@ test('mobile layout handles long Vietnamese values and saves settings', async ({
   await page.getByRole('button', { name: 'Cài đặt', exact: true }).click()
   await expect(page.getByRole('radio', { name: '5s Hồi hộp' })).toBeChecked()
 })
+
+test('choices remain visible while spinning with reduced motion enabled', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  await page.getByLabel('Danh sách của bạn').fill('Đọc sách\nTập thể dục\nĐi dạo')
+  await page.getByRole('button', { name: 'Tạo spinner' }).click()
+  await page.getByRole('button', { name: 'QUAY', exact: true }).click()
+  await expect(page.locator('.reel-stage')).toHaveClass(/is-spinning/)
+
+  const reel = page.locator('.reel-window')
+  await expect(reel).toHaveCSS('opacity', '1')
+  const visibleChoices = await page.evaluate(() => {
+    const viewport = document.querySelector('.reel-window')!.getBoundingClientRect()
+    return [...document.querySelectorAll('.reel-row')].some(row => {
+      const rect = row.getBoundingClientRect()
+      return rect.bottom > viewport.top + 25 && rect.top < viewport.bottom - 25 &&
+        getComputedStyle(row).visibility === 'visible' && !!row.textContent?.trim()
+    })
+  })
+  expect(visibleChoices).toBe(true)
+  await expect(page.locator('.winner-label')).toBeVisible({ timeout: 7000 })
+})
